@@ -1,5 +1,0 @@
-"0","# Retrieve a list of all resources (datasets) available within the found package"
-"0","marriage_licence_resources <- marriage_licence_packages %>%"
-"0","  list_package_resources()"
-"0","# Display the list of resources available in the ""Marriage Licence Statistics"" package"
-"0","marriage_licence_resources"

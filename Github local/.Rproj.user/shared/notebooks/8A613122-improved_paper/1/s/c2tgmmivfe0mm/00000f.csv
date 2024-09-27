@@ -1,5 +1,0 @@
-"0","# Plot: Tree Diameter Distribution"
-"0","ggplot(cleaned_data, aes(x = DBH_TRUNK)) +"
-"0","  geom_histogram(binwidth = 5, fill = ""lightcoral"", color = ""black"") +"
-"0","  labs(title = ""Distribution of Tree Diameters (DBH)"", x = ""Diameter (cm)"", y = ""Count"") +"
-"0","  theme_minimal()"
