@@ -1,0 +1,6 @@
+"0","# Plot: Tree Species Distribution"
+"0","ggplot(cleaned_data, aes(x = BOTANICAL_NAME)) +"
+"0","  geom_bar(fill = ""skyblue"", color = ""black"") +"
+"0","  theme_minimal() +"
+"0","  labs(title = ""Top Tree Species in Toronto"", x = ""Species"", y = ""Count"") +"
+"0","  coord_flip()"

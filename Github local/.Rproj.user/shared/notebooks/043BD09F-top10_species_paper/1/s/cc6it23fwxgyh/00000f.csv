@@ -1,0 +1,5 @@
+"0","# Plot: Tree Density by Ward"
+"0","ggplot(cleaned_data, aes(x = as.factor(WARD))) +"
+"0","  geom_bar(fill = ""steelblue"", color = ""white"") +"
+"0","  labs(title = ""Tree Density by Ward"", x = ""Ward"", y = ""Tree Count"") +"
+"0","  theme_minimal()"

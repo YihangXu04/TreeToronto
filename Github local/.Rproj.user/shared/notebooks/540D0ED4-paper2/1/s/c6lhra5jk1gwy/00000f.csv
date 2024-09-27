@@ -1,0 +1,23 @@
+"0","#| echo: false"
+"0","#### Loading Libraries ####"
+"0","install.packages(""scrartcl.cls"")"
+"1","Warning in "
+"1",""
+"1","install.packages"
+"1",""
+"1"," :
+  "
+"1",""
+"1","package ‘scrartcl.cls’ is not available for this version of R
+
+A version of this package for your version of R might be available elsewhere,
+see the ideas at
+https://cran.r-project.org/doc/manuals/r-patched/R-admin.html#Installing-packages"
+"1",""
+"1","
+"
+"0","library(ggplot2)"
+"0","library(dplyr)"
+"0","library(tidyverse)"
+"0",""
+"0","# Assume 'data' has been pre-loaded"

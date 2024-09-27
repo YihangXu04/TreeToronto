@@ -1,0 +1,206 @@
+---
+title: "Analyzing Tree Species Distribution and Diameters Across Urban Toronto Wards"
+author:
+  - Yihang Xu
+thanks: "A GitHub Repository containing all data, R code, and other files used in this investigation is located here: <https://github.com/YihangXu04/UrbanTreeData.git>"
+date: 09-26-2024
+date-format: long
+abstract: "This paper investigates the distribution and density of tree species across various wards in an urban environment. Through the analysis of tree diameters and the prevalence of specific tree species, we uncover that certain species dominate the landscape, while others are relatively rare. Additionally, variations in tree density across wards highlight significant disparities in green infrastructure distribution.The findings have implications for urban planning, suggesting a need for more diverse species planting and equitable distribution of trees across neighborhoods."
+format: pdf
+number-sections: true
+toc: true
+bibliography: references.bib
+---
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#### Workspace setup ####
+# install.packages("lintr")
+#library(lintr)
+#lint(filename = "/Users/xuyihang/Desktop/Github local/paper/paper2.qmd")
+
+# install.packages("styler")
+#library(styler)
+#style_file(path = "/Users/xuyihang/Desktop/Github local/paper/paper2.qmd")
+
+#### Loading Libraries ####
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+```
+
+# Introduction {#sec-introduction}
+
+Urban forests are essential for the sustainability and livability of cities, offering numerous ecological, economic, and social benefits. In Toronto, where the urban heat island effect is a growing concern, urban trees help mitigate rising temperatures, improve air quality, and enhance biodiversity [@wolf2020urban]. A healthy, diverse, and well-distributed urban forest can significantly enhance public health, lower energy costs, and increase property values [@czaja2020complex]. However, managing...
+
+In this study, we analyze the distribution of tree species and diameters (DBH) across Toronto's urban wards. The primary objectives are to understand species dominance, disparities in tree density, and the size distribution of trees. This data-driven approach will inform future urban forestry strategies and policies [@pataki2021benefits].
+
+This paper is organized as follows: the **Data** section describes the dataset, including its sources and data cleaning. The **Results** section presents an analysis of tree species diversity, size distribution, and tree density across Toronto’s wards. Finally, the **Discussion** section explores the implications of these findings for urban forestry management.
+
+# Data {#sec-data}
+
+## Dataset Overview
+The dataset used in this study is a collection of tree data from Toronto's urban forest, providing detailed records about the trees' physical characteristics and their locations. The data includes key variables such as tree diameters, species names, ward locations, and tree positions. It provides insight into the distribution of trees across different geographic areas of Toronto, with each entry representing an individual tree observation.
+
+## Broader Context
+The dataset provides a comprehensive view of the current state of Toronto's urban trees. It is likely collected as part of municipal efforts to monitor and maintain urban forestry, which contributes to environmental sustainability and the well-being of urban residents. Urban forests play a critical role in reducing air pollution, mitigating the heat island effect, and enhancing urban biodiversity. This dataset is an invaluable resource for understanding tree species distribution, identifying areas in need of reforestation, and supporting future urban planning initiatives.
+
+The dataset is unique to Toronto’s context. Although other urban forestry datasets are available from cities like Vancouver and New York, they differ in geography, climate, and urban planning priorities. Therefore, while these datasets could offer some comparative insights, they were not chosen for this analysis as the focus is specifically on Toronto’s urban ecosystem.
+
+## Key variables
+X_id, OBJECTID, STRUCTID: These are unique identifiers for each tree, helping to differentiate individual observations.
+ADDRESS, STREETNAME, CROSSSTREET1, CROSSSTREET2: These variables provide geographic identifiers for each tree's location, giving insight into where the tree is positioned in the city.
+DBH_TRUNK (Diameter at Breast Height): This is a key variable used to assess the age and size of a tree. Tree diameters range from small, newly planted trees to larger, mature specimens.
+WARD: This variable identifies the political ward in which the tree is located, allowing for geographic analysis across Toronto’s districts.
+BOTANICAL_NAME and COMMON_NAME: These variables identify the tree species by both scientific and common names, giving us insight into the species diversity across the city.
+geometry: Contains the latitude and longitude of each tree's position, allowing for mapping and spatial analysis.
+
+Using the R programming language [@citeR],and `tidyverse` [@citetidyverse] packages.
+
+```{r}
+#| echo: false
+#| warning: false
+# Filter and Clean Data
+data <- read_csv(here::here("/Users/xuyihang/Desktop/Github local/data/data1.csv"))
+sampled_data <- data %>% sample_frac(0.1)
+
+# Remove outliers using the IQR method for DBH
+Q1 <- quantile(sampled_data$DBH_TRUNK, 0.25, na.rm = TRUE)
+Q3 <- quantile(sampled_data$DBH_TRUNK, 0.75, na.rm = TRUE)
+IQR <- Q3 - Q1
+lower_bound <- Q1 - 1.5 * IQR
+upper_bound <- Q3 + 1.5 * IQR
+
+cleaned_data <- sampled_data %>%
+  filter(DBH_TRUNK >= lower_bound & DBH_TRUNK <= upper_bound)
+```
+
+
+## Ethical Considerations
+
+The dataset presents minimal ethical concerns. It contains no personally identifiable information (PII) and was collected by municipal authorities as part of efforts to manage Toronto’s urban forest [@czaja2020complex].
+
+#Measurements
+
+This dataset captures important attributes of Toronto’s urban trees. Each entry in the dataset corresponds to a tree observed in the city, with several key measurements recorded. This section explains how real-world phenomena—such as tree size, species, and location—are translated into the dataset.
+
+## Tree Diameter
+Diameter at Breast Height (DBH) is a standard measurement used to assess a tree's size and age. DBH is measured at 1.4 meters above ground. In this dataset, the DBH is recorded in centimeters under the DBH_TRUNK variable. The diameter is measured with a diameter tape or caliper during field surveys. This measurement serves as a proxy for a tree's maturity and overall health.
+
+Importance: DBH is used to estimate the tree’s contribution to the urban forest in terms of air quality, shade, and carbon storage. Larger diameters generally indicate older trees, which offer more environmental benefits.
+Accuracy: Measurements may vary due to obstacles like irregular trunk shapes, but the field process provides a reliable estimate of size.
+
+## Tree Species
+Tree species are recorded by both scientific (botanical) and common names. Species identification is carried out by trained arborists based on observable characteristics such as leaves, bark, and growth form.
+
+BOTANICAL_NAME: The scientific name of the tree, recorded for accuracy and consistency.
+COMMON_NAME: The common or colloquial name, more familiar to the general public.
+Both names are recorded to ensure the dataset can be used by a wide range of users, from scientists to the public.
+
+## Location Data
+Location data is critical for understanding the distribution of trees. Several variables capture a tree’s precise location:
+
+STREETNAME, CROSSSTREET1, CROSSSTREET2: The streets nearest to the tree’s location.
+WARD: The municipal ward where the tree is located, allowing analysis of tree distribution across political boundaries.
+geometry: Latitude and longitude coordinates, captured via GPS during field surveys, provide the exact location of each tree.
+Accuracy: The GPS coordinates are generally accurate, though occasional signal interference may cause minor discrepancies.
+
+## Unique Identifiers (X_id, OBJECTID, STRUCTID)
+Each tree has a unique identifier to ensure that it can be tracked and managed in the dataset:
+
+X_id, OBJECTID, STRUCTID: Automatically generated identifiers used to uniquely distinguish each tree, ensuring that the same tree is not recorded multiple times.
+
+# Results {#sec-results}
+
+## Tree Species Distribution
+
+The analysis revealed that Toronto’s urban forest is dominated by a few species, particularly *Acer platanoides* (Norway Maple) and *Gleditsia triacanthos* (Honey Locust). The dominance of these species raises concerns about biodiversity [@pataki2021benefits].
+
+```{r fig1, echo=FALSE, fig.cap="Distribution of Tree Species"}
+top_species <- cleaned_data %>%
+  count(BOTANICAL_NAME, sort = TRUE) %>%
+  top_n(10, n) %>%
+  pull(BOTANICAL_NAME)
+
+# Filter the sampled data for top 10 species
+filtered_data <- cleaned_data %>%
+  filter(BOTANICAL_NAME %in% top_species)
+
+# Enhanced Plot: Top 10 Tree Species
+ggplot(filtered_data, aes(x = reorder(BOTANICAL_NAME, BOTANICAL_NAME, function(x) -length(x)), fill = BOTANICAL_NAME)) +
+  geom_bar(color = "white", alpha = 0.9) +
+  scale_fill_viridis_d(option = "C") + # Viridis palette for colorblind-friendly shades
+  coord_flip() +
+  labs(
+    title = "Top 10 Tree Species",
+    x = "Botanical Name",
+    y = "Tree Count"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title.x = element_text(size = 13, face = "bold"),
+    axis.title.y = element_text(size = 13, face = "bold"),
+    legend.position = "none"
+  )
+```
+
+## Tree Diameter (DBH) Distribution
+
+Most trees in Toronto’s urban forest have a DBH between 10 cm and 50 cm, indicating that many of the trees are relatively young [@wolf2020urban].
+
+```{r fig2, echo=FALSE, fig.cap="Tree Diameter Distribution"}
+# Plot: Tree Diameter Distribution
+ggplot(cleaned_data, aes(x = DBH_TRUNK)) +
+  geom_histogram(binwidth = 5, fill = "lightcoral", color = "black") +
+  labs(title = "Distribution of Tree Diameters (DBH)", x = "Diameter (cm)", y = "Count") +
+  theme_minimal()
+```
+
+## Tree Density by Ward
+
+Tree density varies significantly across Toronto's wards, with some wards having far more trees than others. This disparity raises concerns about equitable access to green spaces across different neighborhoods [@czaja2020complex].
+
+```{r fig3, echo=FALSE, fig.cap="Tree Density by Ward"}
+# Plot: Tree Density by Ward
+ggplot(cleaned_data, aes(x = as.factor(WARD))) +
+  geom_bar(fill = "steelblue", color = "white") +
+  labs(title = "Tree Density by Ward", x = "Ward", y = "Tree Count") +
+  theme_minimal()
+```
+
+# Discussion {#sec-discussion}
+
+The results of this analysis provide several important insights for the management of Toronto's urban forest. Firstly, the dominance of a few tree species, such as *Acer platanoides* (Norway Maple) and *Gleditsia triacanthos* (Honey Locust), highlights a potential risk of reduced biodiversity. When an urban forest lacks diversity, it becomes more vulnerable to pests, diseases, and environmental changes. For instance, if a pest or disease affects one of the dominant species, such as the Colorado Blue Spruce, the urban forest could experience significant tree loss. This vulnerability is well-documented in urban forestry literature, where monocultures or low-diversity tree populations have been shown to be more susceptible to environmental stressors [@pataki2021benefits].
+
+To address these concerns, urban forestry management in Toronto should prioritize increasing tree species diversity in future planting programs. This could involve introducing more native species that are better suited to local conditions and less likely to become susceptible to pests or diseases. Furthermore, diversifying tree species can create a more resilient ecosystem that offers better habitat opportunities for wildlife and enhances the ecological functions of the urban forest.
+
+The analysis of tree diameters (DBH) also reveals important trends. Most trees in Toronto’s urban forest are relatively small, with diameters between 10 and 50 cm. This indicates that many of the trees in the city have been planted recently, likely as part of efforts to increase the city's tree canopy. However, the lack of larger, older trees suggests that many trees may not be surviving to maturity. This could be due to several factors, including poor soil quality, limited space for root growth, exposure to pollution, or physical damage from urban infrastructure [@wolf2020urban]. Larger, older trees provide greater environmental benefits than smaller trees, as they sequester more carbon, produce more oxygen, and provide more shade. Therefore, it is crucial to ensure that newly planted trees are cared for properly so they can survive to maturity and contribute to the urban environment in the long term.
+
+Policymakers should consider implementing maintenance programs that provide regular care for newly planted trees, such as watering, pruning, and protection from construction and traffic-related damage. In addition, providing adequate space for root growth and improving soil conditions can help ensure that trees have the resources they need to thrive in an urban environment.
+
+Another critical finding is the significant disparity in tree density across Toronto's wards. Some wards have a much higher tree density than others, which raises concerns about environmental justice. Neighborhoods with fewer trees are likely to experience higher temperatures, poorer air quality, and fewer social and psychological benefits compared to areas with more trees [@czaja2020complex]. This inequity may disproportionately affect lower-income communities, where access to green spaces is already limited.
+
+\newpage
+
+\appendix
+
+# Appendix {#sec-appendix}
+
+## Dataset and Graph Sketches {#sec-appendix-sketches}
+
+Sketches depicting both the desired dataset and the graphs generated in this analysis are available in the GitHub Repository.
+
+## Data Cleaning {#sec-appendix-cleaning}
+
+The data cleaning process involved filtering out some of the columns from the raw dataset and renaming some of the data entries for clarity and simplicity.
+
+## Attribution Statement {#sec-appendix-attribution}
+
+"Contains information licensed under the Open Government Licence – Toronto" [@tphlicense].
+
+\newpage
+
+# References {#sec-references}

@@ -1,0 +1,6 @@
+"0","#| echo: false"
+"0","#### Loading Libraries ####"
+"0","library(ggplot2)"
+"0","library(dplyr)"
+"0",""
+"0","# Assume 'data' has been pre-loaded"
